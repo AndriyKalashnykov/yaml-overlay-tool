@@ -1,19 +1,19 @@
-[Back to Table of contents](../documentation.md)
+[Back to Table of contents](../index.md)
 
 # Actions
 
 There are four types of actions that you can use to apply changes to a YAML document within Yot.
 
-* **Combine**
-* **Delete**
-* **Merge**
-* **Replace**
+1. **[Combine](#1-combine)**
+1. **[Delete](#2-delete)**
+1. **[Merge](#3-merge)**
+1. **[Replace](#4-replace)**
 
 
 There are two types of actions that you can use to apply changes to a YAML document when a `query` returns no results (`onMissing`) within Yot.
 
-* **Ignore**
-* **Inject**
+1. **[Ignore](#1-ignore)**
+1. **[Inject](#2-inject)**
 
 
 ## Overlay actions
@@ -59,15 +59,17 @@ The `ignore` action is the default `onMissing` action if there are no results fo
 
 ```yaml
 yamlFiles:
-  - name: Replace labels if they exist
-    query: metadata.labels
-    value:
-      label1: newLabel
-      label2: newLabel
-    action: replace
-    # the following 2 lines are not required, and this would be considered long-form
-    onMissing:
-      action: ignore
+  - path: /some/yaml/file.yaml
+    overlays:
+      - name: Replace labels if they exist
+        query: metadata.labels
+        value:
+          label1: newLabel
+          label2: newLabel
+        action: replace
+        # the following 2 lines are not required, and this would be considered long-form
+        onMissing:
+          action: ignore
 ```
 
 
@@ -83,28 +85,32 @@ The following example illustrates a simple use-case for missing labels that you 
 
 ```yaml
 yamlFiles:
-  - name: Replace labels if they exist, otherwise inject them
-    query: metadata.labels
-    value:
-      label1: newLabel
-      label2: newLabel
-    action: replace
-    onMissing:
-      action: inject
+  - path: /some/yaml/file.yaml
+    overlays:
+      - name: Replace labels if they exist, otherwise inject them
+        query: metadata.labels
+        value:
+          label1: newLabel
+          label2: newLabel
+        action: replace
+        onMissing:
+          action: inject
 ```
 
 
 ```yaml
 yamlFiles:
-  - name: Find some data, and inject if it does not exist to multiple locations
-    query: ..image
-    value: nginx:latest
-    action: replace
-    onMissing:
-      action: inject
-      injectPath:
-        - spec.template.spec.containers[0].image
+  - path: /some/yaml/file.yaml
+    overlays:
+      - name: Find some data, and inject if it does not exist to multiple locations
+        query: ..image
+        value: nginx:latest
+        action: replace
+        onMissing:
+          action: inject
+          injectPath:
+            - spec.template.spec.containers[0].image
 ```
 
-[Back to Table of contents](../documentation.md)  
+[Back to Table of contents](../index.md)  
 [Next Up: Overlay qualifiers](overlayQualifiers.md)
