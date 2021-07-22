@@ -30,9 +30,40 @@ The `combine` action lets a Yot user combine booleans with booleans, integers wi
 1. Combining strings produces the result of string concatenation.
 
 
+#### Combine Example
+
+The following example will illustrate how to concatenate the existing `app.kubernetes.io/name` label's value with `-dev` to represent that this application is a development instance.
+
+```yaml
+---
+yamlFiles:
+  - path: /file/to/modify.yaml
+    overlays:
+      - name: Combine example
+        query: metadata.labels[app.kubernetes.io/name]
+        value: "-dev"
+        action: combine
+```
+
+
 ### 2. Delete
 
 The `delete` action lets a Yot user remove unwanted pieces of a YAML document.   
+
+
+#### Delete example
+
+The following example will illustrate how to delete a particular Kubernetes label.
+
+```yaml
+---
+yamlFiles:
+  - path: /file/to/modify.yaml
+    overlays:
+      - name: Delete example
+        query: metadata.labels[app.kubernetes.io/name]
+        action: delete
+```
 
 
 ### 3. Merge
@@ -43,9 +74,46 @@ The `merge` action lets a Yot user merge new data with existing data, and is pri
 However, `merge` can also be used to format string/scalar data with some special [Format Markers](formatMarkers.md).  When merging scalar data, it is treated as a `replace`.  However, you can use the format markers to manipulate the existing data with `%v`, or insert a new value or a new line comment.
 
 
+#### Merge Example
+
+The following example will illustrate how to `merge` new Kubernetes labels with existing labels.
+
+```yaml
+---
+yamlFiles:
+  - path: /file/to/modify.yaml
+    overlays:
+      - name: Merge example
+        query: metadata.labels
+        value:
+          app.kubernetes.io/owner: Andrew Huffman
+          app.kubernetes.io/purpose: frontend
+        action: merge
+```
+
+
 ### 4. Replace
 
 The `replace` action lets a Yot user replace existing data with new data.
+
+
+#### Replace example
+
+The following example will illustrate how to replace all existing Kubernetes labels with a new set of labels.
+
+```yaml
+---
+yamlFiles:
+  - path: /file/to/modify.yaml
+    overlays:
+      - name: Replace example
+        query: metadata.labels[app.kubernetes.io/name]
+        value:
+          app.kubernetes.io/name: my-app
+          app.kubernetes.io/owner: Andrew Huffman
+          app.kubernetes.io/purpose: frontend
+        action: replace
+```
 
 
 ## OnMissing actions
@@ -56,6 +124,11 @@ The `replace` action lets a Yot user replace existing data with new data.
 ### 1. Ignore
 
 The `ignore` action is the default `onMissing` action if there are no results found from your `query`.  Use of the `onMissing` key is optional. Use of `ignore` can be added for the sake of being explicit to anyone reading your instructions file.  
+
+
+#### Ignore example
+
+The following example illustrates using the optional long-form API for `onMissing` with action of `ignore`, which is the default behavior if `onMissing` was omitted.
 
 ```yaml
 yamlFiles:
@@ -75,11 +148,10 @@ yamlFiles:
 
 ### 2. Inject
 
-Use `inject` if your `query` returned no results, but you still want to insert data.
+Use `inject` if your `query` returned no results, but you still want to insert data into the YAML file.
 
-#### injectPath
 
-If your initial `query` used some of JSONPath's advanced features (`../`, `*`, etc) rather than a dot-notation style path (e.g: `a.b.c.d`), and no results were obtained, an `injectPath` is also required to allow for properly building the YAML paths.  An `injectPath` can either be a `string` or a `list/array` that you can use to inject the same data to multiple-locations within the file.
+#### Inject Example
 
 The following example illustrates a simple use-case for missing labels that you would like to inject if `metadata.labels` was missing in the YAML file.
 
@@ -98,11 +170,21 @@ yamlFiles:
 ```
 
 
+#### injectPath
+
+If your initial `query` used some of JSONPath's advanced features (`../`, `*`, etc) rather than a dot-notation style path (e.g: `a.b.c.d`), and no results were obtained, an `injectPath` is also required to allow for properly building the YAML paths and inserting the desired data.  
+
+An `injectPath` can either be a `string` or a `list/array` that you can use to inject the same data to multiple-locations within the file.
+
+##### injectPath Example
+
+The following example will illustrate the purpose of the `injectPath`.  We are querying for all instances of image within the YAML file with `..image`.  Should we not find any instances, we would like to inject the data into a particular path or paths.  In this case we are only using a single path of `spec.template.spec.containers[0].image`.
+
 ```yaml
 yamlFiles:
   - path: /some/yaml/file.yaml
     overlays:
-      - name: Find some data, and inject if it does not exist to multiple locations
+      - name: Find some data, and inject if it does not exist to a location
         query: ..image
         value: nginx:latest
         action: replace
@@ -111,6 +193,7 @@ yamlFiles:
           injectPath:
             - spec.template.spec.containers[0].image
 ```
+
 
 [Back to Table of contents](../index.md)  
 [Next Up: Overlay qualifiers](overlayQualifiers.md)
